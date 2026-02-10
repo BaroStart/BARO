@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils';
 
-type Subject = 'ALL' | 'KOREAN' | 'ENGLISH' | 'MATH' | 'ETC';
+/** 탭/필터용 과목 값 (전체, 과목별, 기타 포함) */
+const SUBJECT_VALUES = ['ALL', 'KOREAN', 'ENGLISH', 'MATH', 'ETC'] as const;
+export type Subject = (typeof SUBJECT_VALUES)[number];
 
 interface SubjectTabsProps {
   value: Subject;
@@ -38,5 +40,3 @@ export function SubjectTabs({ value, onChange }: SubjectTabsProps) {
     </div>
   );
 }
-
-export type { Subject };
