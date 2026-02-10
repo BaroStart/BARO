@@ -1,5 +1,11 @@
 # Netlify 배포 설정 (Vite SPA)
 # https://docs.netlify.com/configure-builds/file-based-configuration/
+#
+# ⚠️ 실 API 사용하려면 Netlify 대시보드에서 환경 변수 설정 필요:
+#    Site settings → Environment variables
+#    - VITE_USE_MOCK = false
+#    - VITE_API_URL = https://your-api-server.com
+# (.env 파일은 git에 안 올라가서 배포 시에는 대시보드 값이 빌드에 반영됩니다.)
 
 [build]
   command = "pnpm run build"
