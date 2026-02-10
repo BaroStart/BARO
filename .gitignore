@@ -1,0 +1,34 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+*.tsbuildinfo
+dist-ssr
+*.local
+
+# Environment
+.env
+.env.*
+
+# Generated API client (부가 파일만 무시, ts 소스는 커밋)
+src/generated/.openapi-generator/
+src/generated/.openapi-generator-ignore
+src/generated/.gitignore
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

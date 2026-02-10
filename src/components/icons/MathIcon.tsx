@@ -1,0 +1,22 @@
+interface IconProps {
+  className?: string;
+}
+
+export function MathIcon({ className = 'h-[22px] w-[22px]' }: IconProps) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+    >
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16 8.9V7H8l4 5-4 5h8v-1.9"
+      />
+    </svg>
+  );
+}

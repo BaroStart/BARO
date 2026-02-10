@@ -1,0 +1,6 @@
+# API proxy (avoid CORS + keep relative URLs working)
+/api/*    https://158.180.75.132.nip.io/api/:splat    200!
+/mentor/* https://158.180.75.132.nip.io/mentor/:splat 200!
+
+# Netlify SPA fallback (keep this LAST)
+/*    /index.html   200
