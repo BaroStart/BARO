@@ -1,9 +1,10 @@
 import { ClockIcon, UserIcon } from '@/components/icons';
+import type { Subject } from '@/components/mentee/SubjectTabs';
 import { DEFAULT_THEME, SUBJECT_THEME } from '@/lib/subjectTheme';
 import { getSubjectIcon } from '@/lib/subjectUtils';
 import { cn } from '@/lib/utils';
 
-export type Subject = 'KOREAN' | 'ENGLISH' | 'MATH' | 'ETC';
+export type { Subject };
 
 export type FeedbackItem = {
   id: string;
@@ -23,6 +24,7 @@ type Props = {
 };
 
 const SUBJECT_LABELS: Record<Subject, string> = {
+  ALL: '전체',
   KOREAN: '국어',
   ENGLISH: '영어',
   MATH: '수학',
