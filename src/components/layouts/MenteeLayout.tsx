@@ -10,6 +10,7 @@ import { Dialog, DialogBody, DialogFooter, DialogHeader } from '@/components/ui/
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSSE } from '@/hooks/useSSE';
 import { markAttendance } from '@/lib/menteeActivityStorage';
+import { useNotificationStore } from '@/stores/useNotificationStore';
 import { useAssignmentDetailUIStore } from '@/stores/useAssignmentDetailUIStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -29,6 +30,13 @@ function getPageTitle(pathname: string): string | undefined {
 export function MenteeLayout() {
   useDocumentTitle('설스터디 | 멘티 페이지');
   useSSE();
+  const loadNotifications = useNotificationStore((s) => s.loadNotifications);
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (user?.role === 'mentee') void loadNotifications();
+  }, [user?.role, loadNotifications]);
+
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isHome = pathname === '/mentee';
@@ -39,7 +47,6 @@ export function MenteeLayout() {
   const showTabBar = !isAssignmentDetail;
   const showDeleteIcon = isAssignmentDetail && isAssignmentSubmitted;
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const { user } = useAuthStore();
 
   useEffect(() => {
     if (user?.role !== 'mentee') return;

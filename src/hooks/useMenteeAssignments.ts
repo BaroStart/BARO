@@ -67,10 +67,14 @@ export function useSubmitAssignment() {
       assignmentId,
       memo,
       files,
+      startTime,
+      endTime,
     }: {
       assignmentId: number;
       memo?: string;
       files?: File[];
+      startTime?: string;
+      endTime?: string;
     }) => {
       // 1. 파일 업로드
       const fileUrls = files && files.length > 0 ? await uploadFiles(files) : undefined;
@@ -79,6 +83,8 @@ export function useSubmitAssignment() {
       const body: AssignmentSubmitReq = {
         memo: memo || undefined,
         fileUrls,
+        startTime,
+        endTime,
       };
 
       return submitAssignment(assignmentId, body);

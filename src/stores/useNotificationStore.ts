@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { fetchRecentNotifications, markNotificationRead } from '@/api/notifications';
+import { fetchAllNotifications, markNotificationRead } from '@/api/notifications';
 import { STORAGE_KEYS } from '@/constants';
 
 export type NotificationType = 'reminder' | 'feedback' | 'system';
@@ -13,6 +13,8 @@ export type NotificationItem = {
   message: string;
   time: string;
   isRead: boolean;
+  /** 정렬용 (ISO 문자열) */
+  createdAt?: string;
   link?: string;
   /** 알림에 해당하는 날짜 (YYYY-MM-DD). 클릭 시 해당 날짜로 이동 */
   dateAt?: string;
@@ -38,7 +40,7 @@ export const useNotificationStore = create<NotificationState>()(
       unreadCount: 0,
       loadNotifications: async () => {
         try {
-          const items = await fetchRecentNotifications();
+          const items = await fetchAllNotifications();
           set({ notifications: items, unreadCount: computeUnreadCount(items) });
         } catch {
           set({ notifications: [], unreadCount: 0 });
@@ -63,7 +65,11 @@ export const useNotificationStore = create<NotificationState>()(
         for (const item of items) {
           byId.set(item.id, item);
         }
-        const next = Array.from(byId.values()).sort((a, b) => b.id - a.id);
+        const next = Array.from(byId.values()).sort((a, b) => {
+          const at = a.createdAt ?? '';
+          const bt = b.createdAt ?? '';
+          return bt.localeCompare(at) || b.id - a.id;
+        });
         set({ notifications: next, unreadCount: computeUnreadCount(next) });
       },
     }),

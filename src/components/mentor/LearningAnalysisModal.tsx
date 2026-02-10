@@ -7,7 +7,6 @@ import { MOCK_MENTEES } from '@/data/mockMentees';
 import { SubjectScoresChart, SUBJECT_TO_KEY } from '@/components/mentor/SubjectScoresChart';
 import { Button } from '@/components/ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '@/components/ui/Dialog';
-import { useMentee } from '@/hooks/useMentee';
 import { useSubjectStudyTimes, useWeeklyPatterns } from '@/hooks/useLearningAnalysis';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { DailyStudyPattern, SubjectStudyTime } from '@/types';
@@ -29,7 +28,6 @@ export function LearningAnalysisModal({
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
-  const { data: mentee } = useMentee(menteeId);
   const { data: subjectStudyTimes = [] } = useSubjectStudyTimes(menteeId);
   const { data: weeklyPatterns = [] } = useWeeklyPatterns(menteeId);
 

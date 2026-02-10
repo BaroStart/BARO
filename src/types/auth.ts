@@ -9,7 +9,6 @@ export interface User {
   role: UserRole;
   school?: string;
   profileImage?: string;
-  /** 멘토인 경우 담당 과목 */
   subject?: MentorSubject;
 }
 
@@ -27,10 +26,11 @@ export function getDisplayName(user: User | null): string {
 
 /** 홈 환영 문구: 이름이 있으면 "이름님", 없으면 "멘토님" / "멘티님" (대시보드 이름 표시용) */
 export function getWelcomeTitle(user: User | null): string {
-  if (!user) return '멘티님';
-  const name = getDisplayName(user);
-  const roleSuffix = user.role === 'mentor' ? '멘토님' : '멘티님';
-  const isRoleFallback = name === '멘토' || name === '멘티';
-  if (isRoleFallback) return roleSuffix;
-  return `${name}님`;
+  // if (!user) return '멘티님';
+  // const name = getDisplayName(user);
+  // const roleSuffix = user.role === 'mentor' ? '멘토님' : '멘티님';
+  // const isRoleFallback = name === '멘토' || name === '멘티';
+  // if (isRoleFallback) return roleSuffix;
+  if (user === null) return '멘토님';
+  return `${user.name}님`;
 }

@@ -5,10 +5,15 @@ import { isApiSuccess } from './response';
 
 import { notificationsApi } from './clients';
 
-// 전체 알림 목록 조회
+// 전체 알림 목록 조회 (최신순 정렬)
 export async function fetchAllNotifications(): Promise<NotificationItem[]> {
   const { data } = await notificationsApi.getNotifications();
-  return (data.result ?? []).map(mapNotification);
+  const list = (data.result ?? []).map(mapNotification);
+  return list.sort((a, b) => {
+    const at = a.createdAt ?? '';
+    const bt = b.createdAt ?? '';
+    return bt.localeCompare(at);
+  });
 }
 
 // 최근 알림 조회
@@ -76,5 +81,6 @@ export function mapNotification(res: NotificationResponse): NotificationItem {
     message: res.message ?? '',
     time: formatRelativeTime(res.createdAt),
     isRead: res.read ?? false,
+    createdAt: res.createdAt ?? undefined,
   };
 }

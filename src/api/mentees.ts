@@ -73,17 +73,25 @@ function formatMentoringStartDate(iso: string): string {
 function mapMenteeInfoToMenteeSummary(menteeId: string, info: Awaited<ReturnType<typeof fetchMenteeInfo>>): MenteeSummary | null {
   if (!info?.result) return null;
   const r = info.result;
+
+  // 단일 멘티 조회에서도 assignmentAchieveRate / assignmentCompleteRate 모두 지원
+  let assignmentRate = r.assignmentAchieveRate ?? 0;
+  const rawComplete = (r as any).assignmentCompleteRate as number | undefined;
+  if (!assignmentRate && typeof rawComplete === 'number') {
+    assignmentRate = rawComplete > 1 ? rawComplete / 100 : rawComplete;
+  }
+
   return {
     id: menteeId,
     name: r.menteeName ?? '',
     school: '',
     grade: r.menteeGrade ?? '',
-    progress: Math.round((r.assignmentAchieveRate ?? 0) * 100) || 0,
+    progress: Math.round(assignmentRate * 100) || 0,
     todaySubmitted: 0,
     todayTotal: 0,
     uncheckedCount: 0,
     pendingFeedbackCount: 0,
-    weeklyAchievement: Math.round((r.assignmentAchieveRate ?? 0) * 100) || 0,
+    weeklyAchievement: Math.round(assignmentRate * 100) || 0,
     lastActive:
         r.lastAccess != null && r.lastAccess >= 0
           ? formatLastAccessDays(r.lastAccess)

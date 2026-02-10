@@ -29,12 +29,24 @@ function getDateStr(params?: { date?: string; startDate?: string; endDate?: stri
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
 }
 
-function statusToFeedbackStatus(s?: string): FeedbackItem['status'] {
+/**
+ * 서버 `assignmentStatus`(NOT_SUBMIT/SUBMITTED/FEEDBACKED) → UI 상태 매핑
+ * (목업/레거시 상태도 함께 처리)
+ */
+function assignmentStatusToFeedbackStatus(s?: string): FeedbackItem['status'] {
+  // 서버 enum
+  if (s === 'NOT_SUBMIT') return 'not_submit';
+  if (s === 'SUBMITTED') return 'submitted';
+  if (s === 'FEEDBACKED') return 'feedbacked';
+
+  // 레거시/목업 호환
   if (s === 'completed' || s === 'COMPLETED') return 'completed';
   if (s === 'pending' || s === 'PENDING') return 'pending';
   if (s === 'urgent' || s === 'URGENT') return 'urgent';
   if (s === 'partial' || s === 'PARTIAL') return 'partial';
-  return 'pending';
+
+  // 생성/미지정이면 "대기"로 취급
+  return 'submitted';
 }
 
 /** 피드백 대기/완료 목록 */
@@ -56,7 +68,7 @@ export async function fetchFeedbackItems(
     title: f.assignmentTitle ?? '',
     subject: f.subject ?? '',
     submittedAt: f.submittedAt ?? '',
-    status: statusToFeedbackStatus(f.assignmentStatus),
+    status: assignmentStatusToFeedbackStatus(f.assignmentStatus),
   }));
 }
 
@@ -147,11 +159,20 @@ export async function fetchMenteeKpi(menteeId: string): Promise<MenteeKpi | null
     const data = await fetchMenteeInfo(numId);
     const r = data?.result;
     if (!r) return null;
+
+    // 백엔드 필드 호환: assignmentAchieveRate(0~1) 우선, 없으면 assignmentCompleteRate 사용
+    let assignmentRate = r.assignmentAchieveRate ?? 0;
+    const rawComplete = (r as any).assignmentCompleteRate as number | undefined;
+    if (!assignmentRate && typeof rawComplete === 'number') {
+      assignmentRate = rawComplete > 1 ? rawComplete / 100 : rawComplete;
+    }
+
     return {
       menteeId,
-      totalStudyHours: (r.totalStudyTime ?? 0) / 60,
+      // 서버에서 totalStudyTime 을 "시간" 단위로 내려주므로 그대로 사용
+      totalStudyHours: r.totalStudyTime ?? 0,
       studyHoursChange: 0,
-      assignmentCompletionRate: r.assignmentAchieveRate ?? 0,
+      assignmentCompletionRate: assignmentRate,
       completionRateChange: 0,
       averageScore: r.averageScore ?? 0,
       scoreChange: 0,
@@ -169,7 +190,11 @@ function mapDashboardToSubmittedAssignments(
   if (!menteeInfoList?.length) return [];
   const out: SubmittedAssignment[] = [];
   menteeInfoList.forEach((mentee, idx) => {
-    const menteeIdStr = mentee.menteeId != null ? String(mentee.menteeId) : String(idx);
+    // 멘티 목록(MenteeSummary.id)과 동일한 규칙 사용
+    const menteeIdStr =
+      mentee.menteeId != null && mentee.menteeId > 0
+        ? String(mentee.menteeId)
+        : String(idx + 3);
     const items = mentee.recentSubmittedAssignment ?? [];
     items.forEach((item: RecentSubmittedAssignmentItem) => {
       out.push({

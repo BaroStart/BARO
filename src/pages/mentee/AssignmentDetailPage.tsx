@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import AssignmentActions from '@/components/mentee/assignmentDetail/AssignmentActions';
@@ -7,6 +7,11 @@ import AssignmentDetailTabs from '@/components/mentee/assignmentDetail/Assignmen
 import AssignmentFeedback from '@/components/mentee/assignmentDetail/AssignmentFeedback';
 import AssignmentInfo from '@/components/mentee/assignmentDetail/AssignmentInfo';
 import type { PreviewImage } from '@/components/mentee/assignmentDetail/StudyVerification';
+import {
+  TimeRangeModal,
+  from24,
+  type TimeRangeValue,
+} from '@/components/mentee/TimeRangeModal';
 import { Button } from '@/components/ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '@/components/ui/Dialog';
 import { toast } from '@/components/ui/Toast';
@@ -18,8 +23,15 @@ import {
   saveDraft,
 } from '@/lib/assignmentDraftStorage';
 import { mapDetailToAssignment, mapDetailToAssignmentDetail } from '@/lib/assignmentMapper';
-import { pad2 } from '@/lib/dateUtils';
+import { getTodayDateStr, pad2 } from '@/lib/dateUtils';
 import { useAssignmentDetailUIStore } from '@/stores/useAssignmentDetailUIStore';
+
+function timeRangeToISO(t: TimeRangeValue['start'] | TimeRangeValue['end']): string {
+  let h = t.hour;
+  if (t.meridiem === 'PM' && t.hour !== 12) h += 12;
+  else if (t.meridiem === 'AM' && t.hour === 12) h = 0;
+  return `${String(h).padStart(2, '0')}:${String(t.minute).padStart(2, '0')}`;
+}
 
 export function AssignmentDetailPage() {
   const { assignmentId } = useParams<{ assignmentId: string }>();
@@ -30,8 +42,20 @@ export function AssignmentDetailPage() {
   const [previewImages, setPreviewImages] = useState<PreviewImage[]>([]);
   const [showDraftDialog, setShowDraftDialog] = useState(false);
   const [savedDraftInfo, setSavedDraftInfo] = useState('');
+  const [showSubmitTimeModal, setShowSubmitTimeModal] = useState(false);
 
   const currentAssignmentId = assignmentId ?? '';
+
+  const submitTimeModalInitialValue = useMemo(() => {
+    if (!showSubmitTimeModal) return undefined;
+    const now = new Date();
+    const roundMin = Math.floor(now.getMinutes() / 15) * 15;
+    const startHHmm = `${String(now.getHours()).padStart(2, '0')}:${String(roundMin).padStart(2, '0')}`;
+    const endDate = new Date(now.getTime() + 60 * 60 * 1000);
+    const endRoundMin = Math.floor(endDate.getMinutes() / 15) * 15;
+    const endHHmm = `${String(endDate.getHours()).padStart(2, '0')}:${String(endRoundMin).padStart(2, '0')}`;
+    return { start: from24(startHHmm), end: from24(endHHmm) };
+  }, [showSubmitTimeModal]);
 
   // API 데이터 조회 (목업 시 URL의 assignmentId가 "a1" 등 문자열일 수 있음)
   const { data: apiDetail, isLoading, isError } = useMenteeAssignmentDetail(currentAssignmentId);
@@ -123,25 +147,55 @@ export function AssignmentDetailPage() {
     );
   }, [currentAssignmentId, memo, previewImages]);
 
-  // 과제 제출
-  const handleSubmitAssignment = useCallback(async () => {
-    const numId = Number(currentAssignmentId);
-    if (!numId || isNaN(numId)) return;
+  // 과제 제출 (시간 설정 모달에서 확인 시 호출)
+  const handleSubmitAssignment = useCallback(
+    async (timeRange?: TimeRangeValue) => {
+      const numId = Number(currentAssignmentId);
+      if (!numId || isNaN(numId)) return;
 
-    const files = previewImages.map((img) => img.file).filter((f): f is File => !!f);
+      const files = previewImages.map((img) => img.file).filter((f): f is File => !!f);
 
-    try {
-      await submitMutation.mutateAsync({
-        assignmentId: numId,
-        memo: memo || undefined,
-        files: files.length > 0 ? files : undefined,
-      });
-      removeDraft(currentAssignmentId);
-      toast.success('과제가 제출되었습니다.');
-    } catch {
-      toast.error('과제 제출에 실패했습니다.');
-    }
-  }, [currentAssignmentId, memo, previewImages, submitMutation]);
+      let startTime: string | undefined;
+      let endTime: string | undefined;
+      if (timeRange) {
+        const today = getTodayDateStr();
+        const startHHmm = timeRangeToISO(timeRange.start);
+        const endHHmm = timeRangeToISO(timeRange.end);
+        startTime = `${today}T${startHHmm}:00`;
+        endTime = `${today}T${endHHmm}:00`;
+      }
+
+      try {
+        await submitMutation.mutateAsync({
+          assignmentId: numId,
+          memo: memo || undefined,
+          files: files.length > 0 ? files : undefined,
+          startTime,
+          endTime,
+        });
+        removeDraft(currentAssignmentId);
+        setShowSubmitTimeModal(false);
+        toast.success('과제가 제출되었습니다.');
+      } catch {
+        toast.error('과제 제출에 실패했습니다.');
+      }
+    },
+    [currentAssignmentId, memo, previewImages, submitMutation],
+  );
+
+  // 제출 버튼 클릭 → 시간 설정 모달 열기
+  const handleOpenSubmitModal = useCallback(() => {
+    setShowSubmitTimeModal(true);
+  }, []);
+
+  // 시간 설정 모달에서 제출 확인
+  const handleConfirmSubmitWithTime = useCallback(
+    (value: TimeRangeValue) => {
+      setShowSubmitTimeModal(false);
+      handleSubmitAssignment(value);
+    },
+    [handleSubmitAssignment],
+  );
 
   const handleAddImages = useCallback((images: PreviewImage[]) => {
     setPreviewImages((prev) => [...prev, ...images]);
@@ -218,12 +272,21 @@ export function AssignmentDetailPage() {
             assignment={assignment}
             isEditing={isEditing}
             onChangeToEditMode={() => setIsEditing(true)}
-            onSubmitAssignment={handleSubmitAssignment}
+            onSubmitAssignment={handleOpenSubmitModal}
             onSaveDraft={handleSaveDraft}
             onSubmitEdit={handleSubmitEdit}
           />
         </div>
       )}
+
+      <TimeRangeModal
+        open={showSubmitTimeModal}
+        title="학습 시간 설정"
+        submitLabel="제출하기"
+        initialValue={submitTimeModalInitialValue}
+        onClose={() => setShowSubmitTimeModal(false)}
+        onSubmit={handleConfirmSubmitWithTime}
+      />
 
       <Dialog open={showDraftDialog} onClose={() => setShowDraftDialog(false)} maxWidth="max-w-sm">
         <DialogHeader>

@@ -10,6 +10,7 @@ export type TimeRangeValue = {
 type Props = {
   open: boolean;
   title?: string;
+  submitLabel?: string;
   initialValue?: TimeRangeValue;
   onClose: () => void;
   onSubmit: (value: TimeRangeValue) => void;
@@ -20,7 +21,7 @@ function to24(m: "AM" | "PM", h12: number, min: number) {
   return `${String(m === "PM" ? h + 12 : h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 }
 
-function from24(time: string): { meridiem: "AM" | "PM"; hour: number; minute: number } {
+export function from24(time: string): { meridiem: "AM" | "PM"; hour: number; minute: number } {
   const [hStr, mStr] = time.split(":");
   let h = Number(hStr);
   const minute = Number(mStr);
@@ -33,6 +34,7 @@ function from24(time: string): { meridiem: "AM" | "PM"; hour: number; minute: nu
 export function TimeRangeModal({
   open,
   title = "공부 기록 추가",
+  submitLabel = "저장",
   initialValue,
   onClose,
   onSubmit,
@@ -103,7 +105,7 @@ export function TimeRangeModal({
             onClick={handleSubmit}
             className="flex-1 rounded-lg bg-slate-800 py-2.5 text-[13px] font-medium text-white transition hover:bg-slate-700 active:scale-[0.99]"
           >
-            저장
+            {submitLabel}
           </button>
         </SheetFooter>
       </SheetContent>

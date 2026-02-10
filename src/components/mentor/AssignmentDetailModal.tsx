@@ -13,7 +13,15 @@ interface AssignmentDetailModalProps {
   onClose: () => void;
   assignmentId: string;
   source: 'feedback' | 'incomplete';
-  feedbackStatus?: 'urgent' | 'pending' | 'partial' | 'completed' | null;
+  feedbackStatus?:
+    | 'not_submit'
+    | 'submitted'
+    | 'feedbacked'
+    | 'urgent'
+    | 'pending'
+    | 'partial'
+    | 'completed'
+    | null;
   menteeId?: string;
   fallback?: { title: string; goal?: string; subject?: string };
   overrides?: Partial<AssignmentDetail>;
@@ -155,6 +163,8 @@ export function AssignmentDetailModal({
 
   const isCompleted = source === 'feedback';
   const showFullDetail = isCompleted;
+  const feedbackCompleted = feedbackStatus === 'completed' || feedbackStatus === 'feedbacked';
+  const feedbackWritable = feedbackStatus !== 'not_submit' && !feedbackCompleted;
 
   return (
     <Dialog open onClose={onClose} maxWidth="max-w-2xl">
@@ -405,13 +415,13 @@ export function AssignmentDetailModal({
                 </Button>
               </>
             ) : isCompleted ? (
-              feedbackStatus === 'completed' ? (
+              feedbackCompleted ? (
                 <Link to={`/mentor/mentees/${menteeId}/feedback/${assignmentId}`}>
                   <Button variant="outline" size="sm" onClick={onClose}>
                     전체 피드백 보기
                   </Button>
                 </Link>
-              ) : menteeId ? (
+              ) : menteeId && feedbackWritable ? (
                 <Link to={`/mentor/mentees/${menteeId}/feedback/${assignmentId}`}>
                   <Button size="sm" onClick={onClose}>
                     피드백 작성하기

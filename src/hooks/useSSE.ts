@@ -18,10 +18,10 @@ export function useSSE() {
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || user?.role !== 'mentee') return;
 
-    // 초기 알림 로드
-    loadNotifications();
+    // 초기 알림 로드 (GET /api/v1/notification)
+    void loadNotifications();
 
     const baseURL = API_CONFIG.baseURL || '';
     const topics = `user_${user.id}`;

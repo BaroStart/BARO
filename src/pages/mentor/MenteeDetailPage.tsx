@@ -208,7 +208,11 @@ export function MenteeDetailPage() {
             type: 'feedback',
             sourceId: f.assignmentId,
             status:
-              f.status === 'urgent' ? 'urgent' : f.status === 'completed' ? 'completed' : 'default',
+              f.status === 'urgent'
+                ? 'urgent'
+                : f.status === 'completed' || f.status === 'feedbacked'
+                  ? 'completed'
+                  : 'default',
           });
         }
       });
@@ -279,7 +283,7 @@ export function MenteeDetailPage() {
       .filter((f) => feedbackSubjectFilter === '전체' || f.subject === feedbackSubjectFilter)
       .filter((f) => {
         const dateStr =
-          f.status === 'completed' && f.feedbackDate
+          (f.status === 'completed' || f.status === 'feedbacked') && f.feedbackDate
             ? parseDateFromStr(f.feedbackDate)
             : parseDateFromStr(f.submittedAt);
         return !dateStr || isDateInRange(dateStr, dateRange.start, dateRange.end);
@@ -581,7 +585,10 @@ export function MenteeDetailPage() {
   }
 
   const [calYear, calMonth] = selectedDate.split('-').map(Number);
-  const pendingFeedbackCount = feedbackItems.filter((f) => f.status !== 'completed').length;
+  // "작성 필요"는 제출 완료(피드백 대기)만 카운트
+  const pendingFeedbackCount = feedbackItems.filter((f) =>
+    f.status === 'submitted' || f.status === 'pending' || f.status === 'urgent' || f.status === 'partial'
+  ).length;
 
   return (
     <div className="space-y-6">
