@@ -15,6 +15,7 @@ import {
 } from '@/data/plannerMock';
 import { useMentees } from '@/hooks/useMentees';
 import { getTodayDateStr } from '@/lib/dateUtils';
+import { getGradeLabel } from '@/lib/gradeLabels';
 import { getPlannerFeedback, savePlannerFeedback } from '@/lib/plannerFeedbackStorage';
 
 export function PlannerManagePage() {
@@ -58,7 +59,7 @@ export function PlannerManagePage() {
                 placeholder="멘티를 선택하세요"
                 options={mentees.map((m) => ({
                   value: m.id,
-                  label: `${m.name} (${m.grade} · ${m.track})`,
+                  label: `${m.name} (${getGradeLabel(m.grade) || m.grade} · ${m.track})`,
                 }))}
               />
             </div>

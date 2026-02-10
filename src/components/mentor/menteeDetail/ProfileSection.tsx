@@ -3,18 +3,10 @@ import { BarChart3, Calendar, User } from 'lucide-react';
 import { UserIcon } from '@/components/icons';
 import { SUBJECT_TO_KEY } from '@/components/mentor/SubjectScoresChart';
 import { Button } from '@/components/ui/Button';
+import { getGradeLabel } from '@/lib/gradeLabels';
 import type { MenteeSummary } from '@/types';
 
 import { KpiCard } from './KpiCard';
-
-/** 학습 시간(시간 단위 소수) → "N분" 또는 "N시간" 정수 표기 */
-function formatStudyTime(hours: number): string {
-  const totalMins = Math.round(hours * 60);
-  if (totalMins < 60) return `${totalMins}분`;
-  const h = Math.floor(totalMins / 60);
-  const m = totalMins % 60;
-  return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
-}
 
 interface KpiData {
   totalStudyHours: number;
@@ -51,7 +43,7 @@ export function ProfileSection({
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <span className="text-base font-bold text-foreground sm:text-lg">{mentee.name}</span>
               <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-foreground/70">
-                {mentee.grade} · {mentee.track}
+                {getGradeLabel(mentee.grade) || mentee.grade} · {mentee.track}
               </span>
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
                 활동 중
@@ -82,7 +74,7 @@ export function ProfileSection({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
           {kpi && (
             <>
-              <KpiCard title="총 학습 시간" value={formatStudyTime(kpi.totalStudyHours)} />
+              <KpiCard title="총 학습 시간" value={`${Math.floor(kpi.totalStudyHours)}시간`} />
               <KpiCard
                 title="과제 완료율"
                 value={`${Math.round(kpi.assignmentCompletionRate * 100)}%`}

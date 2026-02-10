@@ -1,6 +1,7 @@
 import { BarChart3 } from 'lucide-react';
 
-import { DefaultSelect } from '@/components/ui/select';
+import { getGradeLabel } from '@/lib/gradeLabels';
+import { cn } from '@/lib/utils';
 
 export function MenteeSelector({
   mentees,
@@ -14,16 +15,21 @@ export function MenteeSelector({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <label className="mb-2 block text-sm font-medium text-slate-700">분석할 멘티 선택</label>
-      <DefaultSelect
+      <select
         value={selectedMenteeId}
-        onValueChange={onSelect}
-        placeholder="멘티를 선택하세요"
-        className="sm:max-w-xs"
-        options={mentees.map((m) => ({
-          value: m.id,
-          label: `${m.name} (${m.grade} · ${m.track})`,
-        }))}
-      />
+        onChange={(e) => onSelect(e.target.value)}
+        className={cn(
+          'flex h-9 w-full max-w-xs items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background',
+          'focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+        )}
+      >
+        <option value="">멘티를 선택하세요</option>
+        {mentees.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name} ({getGradeLabel(m.grade) || m.grade} · {m.track})
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

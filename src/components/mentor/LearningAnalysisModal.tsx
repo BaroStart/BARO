@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ArrowRight, BarChart3, Calendar, Download, Info } from 'lucide-react';
 
+import { MOCK_MENTEES } from '@/data/mockMentees';
 import { SubjectScoresChart, SUBJECT_TO_KEY } from '@/components/mentor/SubjectScoresChart';
 import { Button } from '@/components/ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '@/components/ui/Dialog';
@@ -35,7 +36,13 @@ export function LearningAnalysisModal({
   const mentorSubject =
     user?.role === 'mentor' ? (user.subject ?? '국어') : '국어';
   const subjectKey = SUBJECT_TO_KEY[mentorSubject];
-  const scores = mentee?.scores;
+
+  // 학습 분석 대시보드는 항상 목업 성적 사용 (실 API 멘티여도 s1 목업으로 표시)
+  const scores = useMemo(
+    () =>
+      MOCK_MENTEES.find((m) => m.id === menteeId)?.scores ?? MOCK_MENTEES[0]?.scores,
+    [menteeId],
+  );
   const n = scores?.naesin?.[subjectKey];
   const m = scores?.mockExam?.[subjectKey];
   const hasScores =

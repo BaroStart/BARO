@@ -1,4 +1,5 @@
 import { KpiCard } from '@/components/mentor/menteeDetail';
+import { getGradeLabel } from '@/lib/gradeLabels';
 
 export function ReportHeader({
   mentee,
@@ -10,7 +11,7 @@ export function ReportHeader({
       <h1 className="mb-2 text-2xl font-bold text-slate-900">학생 학습 분석 리포트</h1>
       <div className="text-sm text-slate-600">
         <p>
-          학생명: <span className="font-semibold">{mentee?.name}</span> | 학년: {mentee?.grade} |
+          학생명: <span className="font-semibold">{mentee?.name}</span> | 학년: {mentee?.grade ? getGradeLabel(mentee.grade) : mentee?.grade} |
           과정: {mentee?.track}
         </p>
         <p>

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 import { AssignmentIcon, FeedbackIcon, HomeIcon, PlannerIcon, UserIcon } from '@/components/icons';
 import { useMentees } from '@/hooks/useMentees';
+import { getGradeLabel } from '@/lib/gradeLabels';
 
 interface MenuItem {
   label: string;
@@ -249,7 +250,7 @@ export function Sidebar({
                           selectedMenteeId === mentee.id ? 'text-sky-600/70' : 'text-muted-foreground'
                         }`}
                       >
-                        {mentee.grade} · {mentee.track}
+                        {getGradeLabel(mentee.grade) || mentee.grade} · {mentee.track}
                       </span>
                     </div>
                   </button>
@@ -326,7 +327,7 @@ export function Sidebar({
                     ? 'bg-sky-50 text-sky-600'
                     : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
                 }`}
-                title={`${mentee.name} (${mentee.grade} · ${mentee.track})`}
+                title={`${mentee.name} (${getGradeLabel(mentee.grade) || mentee.grade} · ${mentee.track})`}
               >
                 <UserIcon className="h-5 w-5" />
               </button>

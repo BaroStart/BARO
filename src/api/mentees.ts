@@ -13,15 +13,13 @@ export type MenteesWithTotalInfo = {
   weeklyTotalAssignmentCount?: number;
 };
 
-function formatLastActive(ms: number): string {
-  const diff = Date.now() - ms;
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return '방금 전';
-  if (minutes < 60) return `${minutes}분 전`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}시간 전`;
-  const days = Math.floor(hours / 24);
-  return `${days}일 전`;
+/**
+ * 멘토 대시보드 API lastAccess: "며칠 전" 숫자(1, 2, ...) → "N일 전" 문자열
+ * (API가 Unix timestamp가 아닌 경과 일수로 내려줄 때 사용)
+ */
+function formatLastAccessDays(days: number): string {
+  if (days <= 0) return '방금 전';
+  return `${days} 시간전`;
 }
 
 function mapMentorDashboardToMenteeSummaryList(
@@ -49,8 +47,8 @@ function mapMentorDashboardToMenteeSummaryList(
       pendingFeedbackCount: item.waitFeedbackCount ?? 0,
       weeklyAchievement: Math.round((item.weeklyCompletedAssignmentRate ?? 0) * 100) || 0,
       lastActive:
-        b?.lastAccess != null && b.lastAccess > 0
-          ? formatLastActive(b.lastAccess)
+        b?.lastAccess != null && b.lastAccess >= 0
+          ? formatLastAccessDays(b.lastAccess)
           : undefined,
       mentoringStart: b?.mentoringStartDate
         ? formatMentoringStartDate(b.mentoringStartDate)
@@ -87,8 +85,8 @@ function mapMenteeInfoToMenteeSummary(menteeId: string, info: Awaited<ReturnType
     pendingFeedbackCount: 0,
     weeklyAchievement: Math.round((r.assignmentAchieveRate ?? 0) * 100) || 0,
     lastActive:
-        r.lastAccess != null && r.lastAccess > 0
-          ? new Date(r.lastAccess).toLocaleString()
+        r.lastAccess != null && r.lastAccess >= 0
+          ? formatLastAccessDays(r.lastAccess)
           : undefined,
     mentoringStart: r.mentoringStartDate ?? undefined,
   } as MenteeSummary;

@@ -29,6 +29,95 @@ export type AnalysisType = {
   overallGuidance: string[];
 };
 
+/** 학습 리포트 목업: 실 API 멘티(3, 4) KPI 없을 때 사용 */
+const MOCK_KPI_FALLBACK: MenteeKpi = {
+  menteeId: '',
+  totalStudyHours: 200,
+  studyHoursChange: 0,
+  assignmentCompletionRate: 78,
+  completionRateChange: 2,
+  averageScore: 85,
+  scoreChange: 0,
+  attendanceRate: 92,
+  attendanceChange: 0,
+};
+
+/** 학습 리포트 목업: 멘티 s1 / 3 / 4 선택 시 사용하는 고정 분석 문장 */
+const MOCK_ANALYSIS_S1: Pick<
+  AnalysisType,
+  'overallAnalysis' | 'subjectDetailedAnalysis' | 'overallGuidance'
+> = {
+  overallAnalysis: {
+    summary: [
+      '학생은 기본 개념 이해력은 있는 편이나, 고등 과정에서 요구되는 문제 분석의 깊이와 실수 관리가 아직 충분히 자리 잡지 않은 상태입니다.',
+      '공부할 때 스스로 약점을 점검하며 보완하기보다는, 비교적 잘 되는 단원이나 익숙한 유형 위주로 학습하려는 경향이 있습니다.',
+      '시험 상황에서는 시간 압박이나 긴장으로 인해 평소보다 실수가 늘어나는 타입으로 보이며, 알고 있는 문제에서도 점수를 놓치는 경우가 종종 발생합니다.',
+      '전반적으로 학습량의 문제라기보다는, 공부 방식과 시험 대응 전략을 조정할 필요가 있는 학생입니다.',
+    ],
+    strengths: [],
+    weaknesses: [],
+    guidancePoints: [],
+  },
+  subjectDetailedAnalysis: {
+    국어: {
+      studyStyle: [
+        '국어는 감각적으로 접근하는 경향이 있으며, 지문을 체계적으로 분석하기보다는 빠르게 읽고 정답을 찾으려는 편입니다.',
+      ],
+      weakAreas: [
+        '비문학 지문에서 핵심 논지나 근거 문장을 정확히 잡아내지 못하는 경우가 있습니다.',
+        '문학에서는 선지 판단 기준이 흔들려 비슷한 선택지에서 오답이 발생하는 경향이 보입니다.',
+        '내신 서술형에서는 답의 방향은 맞지만 표현이 부족해 감점되는 경우가 있습니다.',
+      ],
+      mistakeTypes: [
+        '지문은 이해했으나 문제에서 요구한 조건이나 관점을 놓쳐 오답으로 이어지는 경우가 잦습니다.',
+      ],
+      guidanceDirection: [
+        '지문을 구조적으로 읽고, 문제에서 요구하는 기준을 먼저 확인하는 훈련을 진행할 예정입니다.',
+        '속도보다는 정확도를 우선으로 하여 실전에서 안정적인 점수를 낼 수 있도록 지도합니다.',
+      ],
+    },
+    영어: {
+      studyStyle: [
+        '영어는 아는 단어와 익숙한 표현 위주로 해석하는 편이며, 문장 구조가 복잡해질수록 의미를 추측해 문제를 푸는 경향이 있습니다.',
+      ],
+      weakAreas: [
+        '긴 문장 구조 분석 능력이 부족해 해석이 중간에서 끊기는 경우가 있습니다.',
+        '문법은 개념은 알고 있으나 문제에 적용하는 과정에서 실수가 발생합니다.',
+        '어휘의 정확한 의미와 뉘앙스 구분이 약한 편입니다.',
+      ],
+      mistakeTypes: [
+        '문장을 끝까지 해석하지 않고 일부 의미만으로 답을 선택해 오답이 발생하는 경우가 있습니다.',
+      ],
+      guidanceDirection: [
+        '모든 문제를 문장 구조 분석 후 해석하는 습관을 기르는 데 집중할 예정입니다.',
+        '단어와 문법은 단순 암기가 아닌, 실제 문제 적용 위주로 반복 학습을 진행합니다.',
+      ],
+    },
+    수학: {
+      studyStyle: [
+        '수학은 개념 이해 속도는 빠른 편이나, 문제를 풀 때 풀이 과정을 정리하지 않고 바로 답을 구하려는 경향이 있습니다.',
+      ],
+      weakAreas: [
+        '계산 실수가 잦고, 문제 조건을 놓치는 경우가 있습니다.',
+        '풀이 과정이 생략되어 스스로 오류를 발견하지 못하는 경우가 많습니다.',
+      ],
+      mistakeTypes: [
+        '풀 수 있는 문제임에도 불구하고 사소한 실수로 점수를 잃는 비중이 높은 학생입니다.',
+        '시험 후에는 아는 문제였다는 반응이 자주 나타납니다.',
+      ],
+      guidanceDirection: [
+        '문제 풀이 시 조건 확인, 풀이 단계 정리, 검산 과정을 반드시 거치도록 지도할 예정입니다.',
+        '실전 문제를 통해 시간 관리와 안정적인 풀이 습관을 함께 훈련합니다.',
+      ],
+    },
+  },
+  overallGuidance: [
+    '학생은 학습 능력이 부족하다기보다는, 고등 과정에 맞는 공부 방식과 시험 전략이 아직 완전히 정립되지 않은 상태입니다.',
+    '약점과 실수 유형이 비교적 명확하기 때문에, 이를 중심으로 지도할 경우 내신과 수능 모두에서 성적 향상을 기대할 수 있습니다.',
+    '학습량을 무작정 늘리기보다는, 정확한 문제 해석과 실수 관리에 초점을 맞춰 지도할 계획입니다.',
+  ],
+};
+
 function extractSubCategory(title: string, subject: string): string {
   const lowerTitle = title.toLowerCase();
   if (subject === '국어') {
@@ -81,7 +170,10 @@ export function useComputedAnalysis({
   weeklyPatterns,
 }: UseComputedAnalysisParams): AnalysisType | null {
   return useMemo(() => {
-    if (!menteeId || !kpi) return null;
+    const useMockFallback = ['3', '4'].includes(menteeId);
+    const effectiveKpi =
+      kpi ?? (useMockFallback ? { ...MOCK_KPI_FALLBACK, menteeId } : null);
+    if (!menteeId || !effectiveKpi) return null;
 
     const subjectStats = feedbackItems.reduce(
       (acc, item) => {
@@ -165,16 +257,16 @@ export function useComputedAnalysis({
     if (mostActive) studyStyle.push(`${mostActive.day}에 가장 활발`);
 
     const improvements: string[] = [];
-    if (kpi.assignmentCompletionRate < 80)
+    if (effectiveKpi.assignmentCompletionRate < 80)
       improvements.push(
-        `과제 완료율 개선 필요 (현재 ${kpi.assignmentCompletionRate}%, 목표 80% 이상)`,
+        `과제 완료율 개선 필요 (현재 ${effectiveKpi.assignmentCompletionRate}%, 목표 80% 이상)`,
       );
-    if (kpi.completionRateChange < 0)
-      improvements.push(`과제 완료율이 ${Math.abs(kpi.completionRateChange)}%p 하락했습니다`);
+    if (effectiveKpi.completionRateChange < 0)
+      improvements.push(`과제 완료율이 ${Math.abs(effectiveKpi.completionRateChange)}%p 하락했습니다`);
     if (incompleteAssignments.filter((a) => a.status === 'deadline_soon').length > 0)
       improvements.push('마감 임박 과제가 있어 즉시 처리 필요');
-    if (kpi.studyHoursChange < 0)
-      improvements.push(`학습 시간이 ${Math.abs(kpi.studyHoursChange)}시간 감소했습니다`);
+    if (effectiveKpi.studyHoursChange < 0)
+      improvements.push(`학습 시간이 ${Math.abs(effectiveKpi.studyHoursChange)}시간 감소했습니다`);
 
     const overallAnalysis = {
       summary: [] as string[],
@@ -209,7 +301,7 @@ export function useComputedAnalysis({
         '공부할 때 스스로 약점을 점검하며 보완하기보다는, 비교적 잘 되는 단원이나 익숙한 유형 위주로 학습하려는 경향이 있습니다.',
       );
     }
-    if (kpi.completionRateChange < 0 || kpi.scoreChange < 0 || urgentCount > 0) {
+    if (effectiveKpi.completionRateChange < 0 || effectiveKpi.scoreChange < 0 || urgentCount > 0) {
       overallAnalysis.summary.push(
         '시험 상황에서는 시간 압박이나 긴장으로 인해 평소보다 실수가 늘어나는 타입으로 보이며, 알고 있는 문제에서도 점수를 놓치는 경우가 종종 발생합니다.',
       );
@@ -362,15 +454,27 @@ export function useComputedAnalysis({
       );
     }
 
+    // 학습 리포트 목업: 멘티 s1 / 3 / 4 선택 시 고정 분석 문장 사용
+    const useMockAnalysis = menteeId === 's1' || menteeId === '3' || menteeId === '4';
+    const finalOverallAnalysis = useMockAnalysis
+      ? MOCK_ANALYSIS_S1.overallAnalysis
+      : overallAnalysis;
+    const finalSubjectDetailedAnalysis = useMockAnalysis
+      ? MOCK_ANALYSIS_S1.subjectDetailedAnalysis
+      : subjectDetailedAnalysis;
+    const finalOverallGuidance = useMockAnalysis
+      ? MOCK_ANALYSIS_S1.overallGuidance
+      : overallGuidance;
+
     return {
       strengths,
       weaknesses,
       studyStyle,
       improvements,
       subjectStats,
-      overallAnalysis,
-      subjectDetailedAnalysis,
-      overallGuidance,
+      overallAnalysis: finalOverallAnalysis,
+      subjectDetailedAnalysis: finalSubjectDetailedAnalysis,
+      overallGuidance: finalOverallGuidance,
     };
   }, [menteeId, kpi, feedbackItems, incompleteAssignments, subjectStudyTimes, weeklyPatterns]);
 }

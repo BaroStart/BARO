@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useMemo } from 'react';
 
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
@@ -156,8 +157,12 @@ function DefaultSelect({
   className,
   disabled,
 }: DefaultSelectProps) {
-  const normalizedOptions = options.map((opt) =>
-    typeof opt === 'string' ? { value: opt, label: opt } : opt,
+  const normalizedOptions = useMemo(
+    () =>
+      options.map((opt) =>
+        typeof opt === 'string' ? { value: opt, label: opt } : opt,
+      ),
+    [options],
   );
 
   return (

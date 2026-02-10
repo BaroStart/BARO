@@ -34,6 +34,7 @@ import type { AssignmentTemplateListRes } from '@/generated';
 import { useIncompleteAssignments, useMenteeKpi } from '@/hooks/useMenteeDetail';
 import { useMentees } from '@/hooks/useMentees';
 import { getTodayDateStr } from '@/lib/dateUtils';
+import { getGradeLabel } from '@/lib/gradeLabels';
 import { uploadFileViaPreAuthenticatedUrl } from '@/lib/storageUpload';
 import { getSubjectLabel } from '@/lib/subjectLabels';
 import { cn } from '@/lib/utils';
@@ -354,7 +355,7 @@ export function AssignmentRegisterPage() {
                 className="mt-1.5"
                 options={mentees.map((m) => ({
                   value: m.id,
-                  label: `${m.name} (${m.grade} · ${m.track})`,
+                  label: `${m.name} (${getGradeLabel(m.grade) || m.grade} · ${m.track})`,
                 }))}
               />
             </div>

@@ -36,6 +36,7 @@ import {
 import type { FeedbackTemplateListRes } from '@/generated';
 import { formatRemainingTime, getDeadlineStatus, getRemainingMs } from '@/lib/feedbackDeadline';
 import type { FeedbackItem } from '@/lib/mentorFeedbackStorage';
+import { getGradeLabel } from '@/lib/gradeLabels';
 import { getSubjectLabel } from '@/lib/subjectLabels';
 import { getMentorFeedback, saveMentorFeedback } from '@/lib/mentorFeedbackStorage';
 import { cn } from '@/lib/utils';
@@ -271,7 +272,7 @@ export function FeedbackWritePage() {
           <div>
             <p className="text-sm font-semibold text-foreground">{mentee?.name ?? '멘티'}</p>
             <p className="text-xs text-muted-foreground">
-              {mentee?.grade ?? '고3'} · {mentee?.track ?? '이과'}
+              {mentee?.grade ? getGradeLabel(mentee.grade) : '고3'} · {mentee?.track ?? '이과'}
             </p>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
+import { getGradeLabel } from '@/lib/gradeLabels';
 import type {
   MenteeScores,
   MenteeSummary,
@@ -133,7 +134,7 @@ export function ProfileEditModal({
           <Input
             id="profile-grade"
             label="학년"
-            value={grade}
+            value={getGradeLabel(grade) || grade}
             onChange={(e) => setGrade(e.target.value)}
             placeholder="예: 고3"
             disabled

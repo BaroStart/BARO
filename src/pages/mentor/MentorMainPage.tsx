@@ -26,6 +26,7 @@ import { toast } from '@/components/ui/Toast';
 import { useMentees } from '@/hooks/useMentees';
 import { useSubmittedAssignments } from '@/hooks/useSubmittedAssignments';
 import { getDeadlineStatus } from '@/lib/feedbackDeadline';
+import { getGradeLabel } from '@/lib/gradeLabels';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getWelcomeTitle } from '@/types/auth';
 import type { MenteeSummary, SubmittedAssignment } from '@/types';
@@ -291,7 +292,7 @@ function MenteeCard({
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-foreground">{mentee.name}</span>
               <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-foreground/70">
-                {mentee.gradeFull ?? mentee.grade}
+                {mentee.gradeFull ?? (getGradeLabel(mentee.grade) || mentee.grade)}
               </span>
             </div>
             <p className="text-xs text-foreground/70">

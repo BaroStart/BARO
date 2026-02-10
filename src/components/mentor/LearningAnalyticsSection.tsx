@@ -19,6 +19,19 @@ import { useSubjectStudyTimes, useWeeklyPatterns } from '@/hooks/useLearningAnal
 import { useFeedbackItems, useIncompleteAssignments, useMenteeKpi } from '@/hooks/useMenteeDetail';
 import { useMentees } from '@/hooks/useMentees';
 import { exportToPdf, exportToWord } from '@/lib/reportExport';
+import type { MenteeKpi } from '@/types/menteeDetail';
+
+/** 학습 리포트 목업: 멘티 3/4 KPI 없을 때 표시용 */
+const MOCK_KPI_DISPLAY: Omit<MenteeKpi, 'menteeId'> = {
+  totalStudyHours: 200,
+  studyHoursChange: 0,
+  assignmentCompletionRate: 78,
+  completionRateChange: 2,
+  averageScore: 85,
+  scoreChange: 0,
+  attendanceRate: 92,
+  attendanceChange: 0,
+};
 
 type EditingState = {
   section: 'overall' | 'subject' | 'guidance' | null;
@@ -41,6 +54,12 @@ export function LearningAnalyticsSection() {
   );
   const { data: subjectStudyTimes = [] } = useSubjectStudyTimes(selectedMenteeId || undefined);
   const { data: weeklyPatterns = [] } = useWeeklyPatterns(selectedMenteeId || undefined);
+
+  const displayKpi =
+    kpi ??
+    (['3', '4'].includes(selectedMenteeId)
+      ? ({ ...MOCK_KPI_DISPLAY, menteeId: selectedMenteeId } as MenteeKpi)
+      : null);
 
   const computedAnalysis = useComputedAnalysis({
     menteeId: selectedMenteeId,
@@ -124,11 +143,11 @@ export function LearningAnalyticsSection() {
   };
 
   const handleWordDownload = async () => {
-    if (!selectedMentee || !displayAnalysis || !kpi) return;
+    if (!selectedMentee || !displayAnalysis || !displayKpi) return;
     try {
       await exportToWord({
         mentee: selectedMentee,
-        kpi,
+        kpi: displayKpi,
         analysis: displayAnalysis,
         weeklyPatterns,
         subjectStudyTimes,
@@ -168,7 +187,7 @@ export function LearningAnalyticsSection() {
             className="mx-auto max-w-4xl rounded-xl border border-slate-200 bg-white p-8 shadow-lg"
           >
             <ReportHeader mentee={selectedMentee} />
-            <KpiSummary kpi={kpi} />
+            <KpiSummary kpi={displayKpi} />
             <WeeklyPatternsChart weeklyPatterns={weeklyPatterns} />
             <SubjectStudyTimesChart subjectStudyTimes={subjectStudyTimes} />
 
