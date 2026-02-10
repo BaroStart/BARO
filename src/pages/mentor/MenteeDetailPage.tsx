@@ -82,7 +82,7 @@ export function MenteeDetailPage() {
   const { data: kpi = null } = useMenteeKpi(menteeId);
   const { data: serverTasks = [] } = useMenteeTasks(menteeId);
   const { data: serverFeedbackItems = [] } = useFeedbackItems(menteeId);
-  const { data: serverIncomplete = [] } = useIncompleteAssignments(menteeId);
+  const { data: serverIncomplete = [] } = useIncompleteAssignments(menteeId, { date: selectedDate });
   const { data: todayComment = null } = useTodayComment(menteeId, selectedDate);
 
   // 모달 상태 (한 번에 하나만 열림)
@@ -213,9 +213,10 @@ export function MenteeDetailPage() {
         }
       });
 
-    // 과제
+    // 과제: 마감일(dueDate) 기준으로 달력에 표시 (항상 YYYY-MM-DD)
     incompleteAssignments.forEach((a) => {
-      const dateStr = a.deadlineDate ?? a.completedAtDate;
+      const raw = a.deadlineDate ?? a.completedAtDate;
+      const dateStr = raw?.includes('T') ? raw.split('T')[0] : raw;
       if (dateStr) {
         items.push({
           id: `asn-${a.id}`,
@@ -285,14 +286,23 @@ export function MenteeDetailPage() {
       });
   }, [menteeId, feedbackSubjectFilter, feedbackItemsLocal, serverFeedbackItems, dateRange]);
 
-  // 미완료 과제 (필터 + 정렬)
+  // 미완료 과제: 선택 기간 내 마감 또는 기한 지난 과제 포함, 마감일 기준 달력에 표시
   const filteredAssignments = useMemo(() => {
     const incomplete = incompleteAssignments.filter((a) => a.status !== 'completed');
-    const filtered = incomplete.filter(
-      (a) => !a.deadlineDate || isDateInRange(a.deadlineDate, dateRange.start, dateRange.end),
-    );
+    const filtered = incomplete.filter((a) => {
+      if (!a.deadlineDate) return true;
+      // 기간 내 마감이거나, 마감일이 이미 지난 과제(기한 지남)도 표시
+      const inRange = isDateInRange(a.deadlineDate, dateRange.start, dateRange.end);
+      const overdue = a.deadlineDate < dateRange.start;
+      return inRange || overdue;
+    });
     const order = ['deadline_soon', 'not_started', 'in_progress'];
-    return [...filtered].sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
+    return [...filtered].sort((a, b) => {
+      const statusOrder = order.indexOf(a.status) - order.indexOf(b.status);
+      if (statusOrder !== 0) return statusOrder;
+      // 같은 상태면 마감일 빠른 순(기한 지난 것 먼저)
+      return (a.deadlineDate ?? '').localeCompare(b.deadlineDate ?? '');
+    });
   }, [incompleteAssignments, dateRange]);
 
   const openModal = (type: ModalType) => setActiveModal(type);

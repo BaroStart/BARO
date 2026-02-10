@@ -51,18 +51,6 @@ function isTodayKey(dateKey: string) {
   return dateKey === toYmdLocal(new Date());
 }
 
-const MOCK_TODOS_BY_DATE: Record<string, TodoItem[]> = {
-  '2026-02-02': [
-    { id: 1, title: '영어 듣기 연습 30분', done: false },
-    { id: 2, title: '역사 교과서 읽기', done: true },
-  ],
-  '2026-02-03': [
-    { id: 3, title: '수학 오답노트 20분', done: false },
-    { id: 4, title: '국어 비문학 2지문', done: false },
-  ],
-  '2026-02-04': [{ id: 5, title: '영단어 50개', done: false }],
-};
-
 function readMockTodosByDate(): Record<string, TodoItem[]> | null {
   const key = getMenteeTodosStorageKey();
   if (!key) return null;

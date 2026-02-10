@@ -8,7 +8,7 @@ import {
   fetchTodayComments,
 } from '@/api/menteeDetail';
 
-type DateRange = { startDate?: string; endDate?: string };
+type DateRange = { startDate?: string; endDate?: string; date?: string };
 
 export function useFeedbackItems(
   menteeId: string | undefined,

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-type Subject = 'ALL' | 'KOREAN' | 'ENGLISH' | 'MATH';
+type Subject = 'ALL' | 'KOREAN' | 'ENGLISH' | 'MATH' | 'ETC';
 
 interface SubjectTabsProps {
   value: Subject;

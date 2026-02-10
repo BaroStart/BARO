@@ -16,9 +16,6 @@ const LOGO_BRAND = '215 25% 35%';
 const LOGO_BRAND_LIGHT = '215 20% 95%';
 const LOGO_BRAND_MEDIUM = '215 20% 88%';
 
-/** 기본 테마 컬러 - Teal 기반 */
-const DEFAULT_BRAND = GLOBAL_PALETTES.default.brand;
-
 export type TimetablePaletteId = 'logo' | 'instagram' | 'softMint' | 'mono' | 'default' | 'story' | 'pastel' | 'vivid' | 'calm' | 'custom';
 
 /** 오늘의 학습 타임테이블용 컬러 팔레트 — 선명하고 생동감 있는 그라디언트 */

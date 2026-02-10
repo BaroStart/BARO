@@ -15,7 +15,7 @@ import { assignmentsApi } from './clients';
 import axiosInstance from './axiosInstance';
 
 /** 목업 AssignmentDetail → API 형식 (상세 페이지에서 목업 ID 클릭 시 사용) */
-function mockDetailToMenteeDetailRes(mock: AssignmentDetail, assignmentId: string): import('@/generated').AssignmentMenteeDetailRes {
+function mockDetailToMenteeDetailRes(mock: AssignmentDetail, _assignmentId: string): import('@/generated').AssignmentMenteeDetailRes {
   const subjectEnum = getSubjectEnum(mock.subject) as import('@/generated').AssignmentMenteeDetailResSubjectEnum;
   const dueDate = mock.date ? `${mock.date.replace(/\./g, '-')}T23:59:00` : undefined;
   return {
@@ -64,11 +64,11 @@ export async function createAssignment(body: AssignmentCreateReq) {
 
 // 멘티 과제 목록 조회 (서버가 result를 단일 객체로 줄 수 있어 배열로 정규화)
 export async function fetchMenteeAssignments(params?: {
-  subject?: AssignmentCreateReq['subject'];
+  subject?: AssignmentCreateReq['subject'] | string;
   dueDate?: string;
 }) {
   const { data } = await assignmentsApi.getMenteeAssignments({
-    subject: params?.subject as GetMenteeAssignmentsSubjectEnum,
+    subject: params?.subject as GetMenteeAssignmentsSubjectEnum | undefined,
     dueDate: params?.dueDate,
   });
   const r = data.result;

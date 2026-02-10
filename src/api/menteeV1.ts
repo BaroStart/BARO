@@ -1,5 +1,6 @@
 import type { ApiResponseGetMenteeInfoResponseDto } from '@/generated';
 
+import { menteeApi } from './clients';
 import axiosInstance from './axiosInstance';
 
 /** 멘티 정보 조회 — 백엔드 경로는 GET /api/v1/{menteeId} (Swagger: Mentee API) */

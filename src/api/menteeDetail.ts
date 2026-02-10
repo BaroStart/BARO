@@ -72,15 +72,22 @@ export async function fetchIncompleteAssignments(
   if (Number.isNaN(numId)) return [];
   const dashboard = await fetchMenteeDashboard(numId, { searchType: 'DAY', date: getDateStr(params) });
   const list = dashboard?.notCompletedAssignments ?? [];
-  return list.map((a, i) => ({
-    id: String(a.assignmentId ?? i),
-    menteeId,
-    title: a.title ?? '',
-    subject: a.subject ?? '',
-    description: undefined,
-    deadlineDate: a.dueDate,
-    status: 'not_started' as const,
-  }));
+  return list.map((a, i) => {
+    const dueIso = a.dueDate ?? '';
+    const deadlineDateOnly = dueIso.includes('T') ? dueIso.split('T')[0] : dueIso || undefined;
+    const timeStr = dueIso ? new Date(dueIso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+    const subjectLabel = a.subject === 'NOT_SUBMIT' ? '미제출' : (a.subject ?? '');
+    return {
+      id: String(a.assignmentId ?? i),
+      menteeId,
+      title: a.title ?? '',
+      subject: subjectLabel,
+      description: undefined,
+      deadlineDate: deadlineDateOnly,
+      deadline: deadlineDateOnly && timeStr ? `${deadlineDateOnly} ${timeStr}` : dueIso || undefined,
+      status: 'not_started' as const,
+    };
+  });
 }
 
 /** 학습 일정/To-Do 목록 */

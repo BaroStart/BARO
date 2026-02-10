@@ -1,0 +1,12 @@
+# Netlify 배포 설정 (Vite SPA)
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "pnpm run build"
+  publish = "dist"
+
+# SPA: 모든 경로를 index.html로 보내서 클라이언트 라우팅 동작
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
